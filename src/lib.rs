@@ -7,10 +7,6 @@ use std::io::{Error, ErrorKind};
 use futures::sink::SinkExt;
 
 
-
-
-
-// https://docs.rs/tokio-util/0.6.7/tokio_util/codec/index.html
 fn check(left: usize, right: usize, data: &[u8]) -> Result<(), Error> {
     if let Ok(num_string) = String::from_utf8(Vec::from(&data[..left])) {
         if let Ok(exp_size) = num_string.parse::<usize>() {
@@ -56,9 +52,7 @@ impl Decoder for NetStringCodec {
 
         match self.extract_frame(src) {
             Ok(frame) => Ok(frame),
-            Err(_) => Err(
-                Error::new(ErrorKind::InvalidData, "Could not parse data")
-            )
+            Err(_) => Err(Error::new(ErrorKind::InvalidData, "Could not parse data"))
         }
     }
 }
