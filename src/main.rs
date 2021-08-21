@@ -12,10 +12,10 @@ use tokio::io::AsyncWriteExt;
 
 // https://docs.rs/tokio-util/0.6.7/tokio_util/codec/index.html
 fn check(left: usize, right: usize, data: &[u8]) -> Result<(), Error> {
-    if let Ok(num_string) = String::from_utf8(Vec::from(&data[..left])){
-        if let Ok(exp_size) = num_string.parse::<usize>(){
-            if right > left && (right-1) - left == exp_size {
-                return Ok(())
+    if let Ok(num_string) = String::from_utf8(Vec::from(&data[..left])) {
+        if let Ok(exp_size) = num_string.parse::<usize>() {
+            if right > left && (right - 1) - left == exp_size {
+                return Ok(());
             }
         }
     }
