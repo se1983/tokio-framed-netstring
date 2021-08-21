@@ -1,13 +1,13 @@
-use tokio_util::codec::{Decoder, Encoder, Framed};
+use tokio_util::codec::{Decoder, Encoder};
 use bytes::{BytesMut, BufMut};
 use std::io::{Error, ErrorKind};
-use tokio::net::{TcpListener};
+
 
 #[allow(unused_imports)]
 use futures::sink::SinkExt;
-use futures::StreamExt;
-use tokio::net::TcpStream;
-use tokio::io::AsyncWriteExt;
+
+
+
 
 
 // https://docs.rs/tokio-util/0.6.7/tokio_util/codec/index.html
@@ -33,10 +33,10 @@ fn extract_frameborders(src: &BytesMut) -> Option<(usize, usize)> {
     }
 }
 
-struct NetStringCodec {}
+pub struct NetStringCodec {}
 
 impl NetStringCodec {
-    pub(crate) fn extract_frame(&self, src: &mut BytesMut) -> Result<Option<String>, Box<dyn std::error::Error>> {
+    pub fn extract_frame(&self, src: &mut BytesMut) -> Result<Option<String>, Box<dyn std::error::Error>> {
         if let Some((lhs, rhs)) = extract_frameborders(src) {
             check(lhs, rhs, src)?;
             let data = src.split_to(rhs + 1); // <- modify src
@@ -74,33 +74,3 @@ impl Encoder<String> for NetStringCodec {
     }
 }
 
-async fn server() {
-    if let Ok(tcp_listener) = TcpListener::bind("127.0.0.1:7979").await {
-        println!("listening with {:?}", tcp_listener);
-        while let Ok((tcp_stream, sock_addr)) = tcp_listener.accept().await {
-            println!("Accepted inbound from {}", sock_addr);
-            tokio::spawn(async move {
-                let (_, mut reader) = Framed::new(tcp_stream, NetStringCodec {}).split();
-                while let Some(Ok(line)) = reader.next().await {
-                    println!("Received:{:?}", line);
-                }
-            });
-        }
-        eprintln!("TCP connection was closed!");
-    }
-}
-
-
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let serv_handle = tokio::spawn(server());
-
-    let mut stream = TcpStream::connect("127.0.0.1:7979").await?;
-    // Write some data.
-    stream.write_all(b"5:hello,").await?;
-    stream.write_all(b"5:hello,").await?;
-
-    let _ = serv_handle.await;
-
-    Ok(())
-}
