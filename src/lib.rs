@@ -35,7 +35,7 @@ impl NetStringCodec {
     pub fn extract_frame(&self, src: &mut BytesMut) -> Result<Option<String>, Box<dyn std::error::Error>> {
         if let Some((lhs, rhs)) = extract_frameborders(src) {
             let data = src.split_to(rhs + 1); // <- modify src
-            check(lhs, rhs, src)?;
+            check(lhs, rhs, &data[..])?;
             let data = String::from_utf8(Vec::from(&data[lhs + 1..rhs]))?;
             return Ok(Some(data));
         }
