@@ -62,7 +62,9 @@ impl Encoder<String> for NetStringCodec {
     type Error = std::io::Error;
 
     fn encode(&mut self, item: String, dst: &mut BytesMut) -> Result<(), Self::Error> {
+        println!("Encoding {:?}", item);
         let data = format!("{}:{},", item.len(), item);
+        println!("Encoded data: {:?}", data);
         dst.put(data.as_bytes());
         Ok(())
     }
