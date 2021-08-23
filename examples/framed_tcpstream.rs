@@ -1,7 +1,7 @@
 use tokio::net::{TcpListener, TcpStream};
 use tokio_util::codec::{Framed};
 use futures::StreamExt;
-use tokio::io::AsyncWriteExt;
+
 use tokio_netstring::NetStringCodec;
 use futures::sink::SinkExt;
 
@@ -27,7 +27,7 @@ async fn server() {
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let serv_handle = tokio::spawn(server());
 
-    let mut stream = TcpStream::connect("127.0.0.1:7979").await?;
+    let stream = TcpStream::connect("127.0.0.1:7979").await?;
     let mut framed_stream = Framed::new(stream, NetStringCodec {});
     // Write some data.
     framed_stream.send("hello".to_string()).await?;
