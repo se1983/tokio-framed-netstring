@@ -1,10 +1,9 @@
-use tokio::net::{TcpListener, TcpStream};
-use tokio_util::codec::{Framed};
 use futures::StreamExt;
+use tokio::net::{TcpListener, TcpStream};
+use tokio_util::codec::Framed;
 
-use tokio_netstring::NetStringCodec;
 use futures::sink::SinkExt;
-
+use tokio_netstring::NetStringCodec;
 
 async fn server() {
     if let Ok(tcp_listener) = TcpListener::bind("127.0.0.1:7979").await {
@@ -21,7 +20,6 @@ async fn server() {
         eprintln!("TCP connection was closed!");
     }
 }
-
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {

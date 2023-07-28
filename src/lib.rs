@@ -1,11 +1,9 @@
-use tokio_util::codec::{Decoder, Encoder};
-use bytes::{BytesMut, BufMut};
+use bytes::{BufMut, BytesMut};
 use std::io::{Error, ErrorKind};
-
+use tokio_util::codec::{Decoder, Encoder};
 
 #[allow(unused_imports)]
 use futures::sink::SinkExt;
-
 
 fn check(left: usize, right: usize, data: &[u8]) -> Result<(), Error> {
     if let Ok(num_string) = String::from_utf8(Vec::from(&data[..left])) {
@@ -18,21 +16,23 @@ fn check(left: usize, right: usize, data: &[u8]) -> Result<(), Error> {
     Err(Error::new(ErrorKind::InvalidData, "Invalid data"))
 }
 
-
 fn extract_frameborders(src: &BytesMut) -> Option<(usize, usize)> {
     let left_idx = src.iter().position(|&b| b == b':');
     let right_idx = src.iter().position(|&b| b == b',');
 
     match (left_idx, right_idx) {
         (Some(l), Some(r)) => Some((l, r)),
-        _ => None
+        _ => None,
     }
 }
 
 pub struct NetStringCodec {}
 
 impl NetStringCodec {
-    pub fn extract_frame(&self, src: &mut BytesMut) -> Result<Option<String>, Box<dyn std::error::Error>> {
+    pub fn extract_frame(
+        &self,
+        src: &mut BytesMut,
+    ) -> Result<Option<String>, Box<dyn std::error::Error>> {
         if let Some((lhs, rhs)) = extract_frameborders(src) {
             let data = src.split_to(rhs + 1); // <- modify src
             check(lhs, rhs, &data[..])?;
@@ -52,11 +52,10 @@ impl Decoder for NetStringCodec {
 
         match self.extract_frame(src) {
             Ok(frame) => Ok(frame),
-            Err(_) => Err(Error::new(ErrorKind::InvalidData, "Could not parse data"))
+            Err(_) => Err(Error::new(ErrorKind::InvalidData, "Could not parse data")),
         }
     }
 }
-
 
 impl Encoder<String> for NetStringCodec {
     type Error = std::io::Error;
@@ -69,4 +68,3 @@ impl Encoder<String> for NetStringCodec {
         Ok(())
     }
 }
-
